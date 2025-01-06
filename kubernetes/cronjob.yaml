@@ -8,23 +8,23 @@ spec:
   suspend: false
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
-  
+
   jobTemplate:
     spec:
       template:
         spec:
           restartPolicy: OnFailure
-          
+
           containers:
           - name: backup-mongodb
-            image: ptuladhar/k8s-backup-mongodb:latest
+            image: docker.io/deploymyestino/k8s-backup-mongodb:main
             env:
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
                   name: mongodb-uri
                   key: MONGODB_URI
-            
+
             - name: MONGODB_OPLOG
               value: true
 
@@ -51,4 +51,12 @@ spec:
                 secretKeyRef:
                   name: aws
                   key: AWS_DEFAULT_REGION
+            - name: DELETE_OLD_BACKUPS
+              value: "1"
+            - name: DELETE_BUCKET_NAME
+              value: BUCKET/PREFIX
+            - name: DELETE_PREFIX
+              value: PREFIX/
+            - name: RETENTION_DAYS
+              value: "30"
 

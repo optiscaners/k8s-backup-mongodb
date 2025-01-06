@@ -33,6 +33,21 @@ fi
 echo "[$SCRIPT_NAME] Uploading compressed archive to S3 bucket..."
 aws ${S3_ENDPOINT_OPT} s3 cp "$COPY_NAME" "$BUCKET_URI/$COPY_NAME"
 
+# Delete old backups
+if [[ "${DELETE_OLD_BACKUPS}" == "1" ]]; then
+
+# Datum berechnen
+OLDER_THAN_DATE=$(date -d "-${RETENTION_DAYS} days" +%Y-%m-%dT%H:%M:%S)
+
+aws s3api list-objects-v2 --bucket "${DELETE_BUCKET_NAME}" --prefix "${DELETE_PREFIX}" --query "Contents[?LastModified<='${OLDER_THAN_DATE}'].Key" | jq -r '.[]'| while read -r FILE_KEY;
+do
+  if [[ ! "${FILE_KEY}" == ${DELETE_PREFIX} ]]; then
+    echo "Delete ${FILE_KEY}"
+    aws s3 rm s3://"${DELETE_BUCKET_NAME}"/"${FILE_KEY}"
+  fi
+done
+fi
+
 echo "[$SCRIPT_NAME] Cleaning up compressed archive..."
 rm "$COPY_NAME"
 rm "$ARCHIVE_NAME" || true

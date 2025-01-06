@@ -1,7 +1,7 @@
 FROM mongo:latest
 
 RUN apt update && \
-    apt install awscli p7zip-full -y
+    apt install awscli p7zip-full jq -y
 
 WORKDIR /scripts
 
